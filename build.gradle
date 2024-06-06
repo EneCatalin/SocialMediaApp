@@ -1,0 +1,36 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.0'
+	id 'io.spring.dependency-management' version '1.1.5'
+}
+
+group = 'social.media'
+version = '0.0.1-SNAPSHOT'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'org.postgresql:postgresql:42.2.20'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// Swagger / OpenAPI 3 dependencies
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
