@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import social.media.socialMedia.entity.User;
+import social.media.socialMedia.dto.CreateUserDto;
+import social.media.socialMedia.dto.UserDto;
 import social.media.socialMedia.service.UserService;
 
 import java.util.HashMap;
@@ -34,27 +35,27 @@ public class UserController {
     }
 
     @GetMapping("/seed")
-    public ResponseEntity<List<User>> seedUsers() {
-        List<User> users = userService.seedUsers();
+    public ResponseEntity<List<UserDto>> seedUsers() {
+        List<UserDto> users = userService.seedUsers();
 
         return ResponseEntity.ok(users);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        User user = userService.getUserByUsername(username);
+    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
+        UserDto user = userService.getUserByUsername(username);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping()
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
+    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserDto user) {
+        UserDto  createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }
 }

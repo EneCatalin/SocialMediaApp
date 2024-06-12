@@ -93,7 +93,7 @@ public class User {
         return profilePicture;
     }
 
-    public void setProfilePic(String profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
