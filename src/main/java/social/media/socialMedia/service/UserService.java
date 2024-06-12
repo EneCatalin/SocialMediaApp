@@ -28,22 +28,17 @@ public class UserService {
 
     // Convert User entity to UserDto
     private UserDto convertToDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setBio(user.getBio());
-        dto.setProfilePicture(user.getProfilePicture());
-        return dto;
+        return new UserDto(user.getUsername(), user.getPassword(), user.getEmail(), user.getProfilePicture());
     }
 
     // Convert CreateUserDto to User entity
     private User convertToEntity(CreateUserDto dto) {
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setEmail(dto.getEmail());
-        user.setBio(dto.getBio());
-        user.setProfilePicture(dto.getProfilePicture());
+        user.setUsername(dto.username());
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setEmail(dto.email());
+        user.setBio(dto.bio());
+        user.setProfilePicture(dto.profilePicture());
         return user;
     }
 
