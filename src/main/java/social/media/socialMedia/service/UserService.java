@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import social.media.socialMedia.entity.User;
+import social.media.socialMedia.exception.ResourceNotFoundException;
 import social.media.socialMedia.repository.UserRepository;
 import social.media.socialMedia.util.seed.Constants;
 
@@ -29,7 +30,13 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         logger.info("Fetching user with username: {}", username);
-        return userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username);
+
+        //! Not sure this is exception worthy
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
+        return user;
     }
 
     public List<User> seedUsers() {

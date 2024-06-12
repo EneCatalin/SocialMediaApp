@@ -67,3 +67,8 @@ TODO: check if schema is good (written 06/06/2024)
 
 (Local) Application Swagger:
 http://localhost:8080/swagger-ui/index.html?continue#/User%20Management/checkServiceHealth
+
+
+Thoughts on exception handling:
+
+Since I've just started implementing them I am still unsure when to throw them and when not to. Ultimately it seems to be up for discussion/interpretation in certain situations. I will try to keep them for cases where it makes at least some sense but otherwise use Optional
