@@ -6,13 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import social.media.socialMedia.dto.CreateUserDto;
-import social.media.socialMedia.dto.UserDto;
+import social.media.socialMedia.dto.FindByUsernameDto;
 import social.media.socialMedia.entity.User;
 import social.media.socialMedia.exception.ResourceNotFoundException;
 import social.media.socialMedia.repository.UserRepository;
+import social.media.socialMedia.util.mapper.UserMapper;
 import social.media.socialMedia.util.seed.Constants;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,53 +28,62 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Convert User entity to UserDto
-    private UserDto convertToDto(User user) {
-        return new UserDto(user.getUsername(), user.getPassword(), user.getEmail(), user.getProfilePicture());
+
+    @Autowired
+    private UserMapper userMapper;
+
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+    private User findByUsername(String username) {
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
+        return userOptional.orElse(null);
     }
 
-    // Convert CreateUserDto to User entity
-    private User convertToEntity(CreateUserDto dto) {
-        User user = new User();
-        user.setUsername(dto.username());
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        user.setEmail(dto.email());
-        user.setBio(dto.bio());
-        user.setProfilePicture(dto.profilePicture());
-        return user;
-    }
-
-
-    public List<UserDto > getAllUsers() {
+    public List<FindByUsernameDto> getAllUsers() {
         logger.info("Fetching all users");
         return userRepository.findAll().stream()
-                .map(this::convertToDto)
+                .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
     }
 
-    public UserDto  getUserByUsername(String username) {
+    public FindByUsernameDto getUserByUsername(String username) {
         logger.info("Fetching user with username: {}", username);
-        User user = userRepository.findByUsername(username);
+        User user = findByUsername(username);
 
         //! Not sure this is exception worthy
         if (user == null) {
+            logger.error("User not found with username: {}", username);
             throw new ResourceNotFoundException("User not found with username: " + username);
         }
-        return convertToDto(user);
+
+        return userMapper.userToUserDto(user);
     }
 
-    public List<UserDto> seedUsers() {
-        Constants.seedUsersList.forEach(user -> user.setPassword(passwordEncoder.encode(user.getPassword())));
+    public List<FindByUsernameDto> seedUsers() {
+        Constants.seedUsersList.forEach(user -> user.setPassword(encodePassword(user.getPassword())));
         return userRepository.saveAll(Constants.seedUsersList).stream()
-                .map(this::convertToDto)
+                .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
     }
 
-    public UserDto  createUser(CreateUserDto  createUserDto) {
-        User user = convertToEntity(createUserDto);
+    public FindByUsernameDto createUser(CreateUserDto  createUserDto) {
+        User user = userMapper.createUserDtoToUser(createUserDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return convertToDto(userRepository.save(user));
+        return userMapper.userToUserDto(userRepository.save(user));
+    }
+
+
+    public void deleteUserByUsername(String username) {
+        logger.info("Deleting user with username: {}", username);
+        User user = findByUsername(username);
+        if (user != null) {
+            userRepository.delete(user);
+        } else {
+            logger.error("User not found with username: {}", username);
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
     }
 
 }

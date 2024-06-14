@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social.media.socialMedia.dto.CreateUserDto;
-import social.media.socialMedia.dto.UserDto;
+import social.media.socialMedia.dto.FindByUsernameDto;
 import social.media.socialMedia.service.UserService;
 
 import java.util.HashMap;
@@ -35,27 +35,36 @@ public class UserController {
     }
 
     @GetMapping("/seed")
-    public ResponseEntity<List<UserDto>> seedUsers() {
-        List<UserDto> users = userService.seedUsers();
+    public ResponseEntity<List<FindByUsernameDto>> seedUsers() {
+        List<FindByUsernameDto> users = userService.seedUsers();
 
         return ResponseEntity.ok(users);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
+    public ResponseEntity<List<FindByUsernameDto>> getAllUsers() {
+        List<FindByUsernameDto> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
-        UserDto user = userService.getUserByUsername(username);
+    public ResponseEntity<FindByUsernameDto> getUserByUsername(@PathVariable String username) {
+        FindByUsernameDto user = userService.getUserByUsername(username);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping()
-    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserDto user) {
-        UserDto  createdUser = userService.createUser(user);
+    public ResponseEntity<FindByUsernameDto> createUser(@RequestBody CreateUserDto user) {
+        FindByUsernameDto createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<Map<String, String>> deleteByUsername() {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "UP");
+
+        userService.deleteUserByUsername("admin");
+        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
 }
