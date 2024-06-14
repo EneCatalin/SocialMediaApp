@@ -4,6 +4,7 @@ package social.media.socialMedia.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,31 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private Environment environment;
+
+    @GetMapping("/login")
+    public ResponseEntity<Void> redirectToGitHub() {
+        String clientId = environment.getProperty("GITHUB_CLIENT_ID");
+        String redirectUri = "http://localhost:8080/api/users/oauth/callback";
+
+        String authorizationUrl = "https://github.com/login/oauth/authorize?" +
+                "client_id=" + clientId +
+                "&redirect_uri=" + redirectUri;
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", authorizationUrl)
+                .build();
+    }
+
+    @GetMapping("/oauth/callback")
+    public ResponseEntity<Map<String, String>> handleOAuthCallback(@RequestParam("code") String authorizationCode) {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "OAuth callback received");
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @Operation(summary = "Check service health", description = "Returns the status of the user service")
     @GetMapping("/health")
