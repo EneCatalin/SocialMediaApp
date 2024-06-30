@@ -13,6 +13,9 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "role", nullable = false)
+    private String role;
+
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
@@ -33,9 +36,10 @@ public class User {
 
 
     // Constructor to initialize fields except for id and createdAt
-    public User(String username, String password, String email, String bio, String profilePicture) {
+    public User(String username, String role, String password, String email, String bio, String profilePicture) {
         this.username = username;
         this.password = password;
+        this.role=role;
         this.email = email;
         this.bio = bio;
         this.profilePicture = profilePicture;
@@ -63,6 +67,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setRole(String role) {
+        this.role=role;
+    }
+
+    public String getRole() {
+        return role;
     }
 
     public String getPassword() {
