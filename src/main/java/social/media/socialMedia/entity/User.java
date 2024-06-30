@@ -3,6 +3,8 @@ package social.media.socialMedia.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -13,9 +15,6 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "role", nullable = false)
-    private String role;
-
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
@@ -25,7 +24,7 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name= "bio")
+    @Column(name = "bio")
     private String bio;
 
     @Column(name = "profile_picture")
@@ -34,22 +33,28 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
-    // Constructor to initialize fields except for id and createdAt
-    public User(String username, String role, String password, String email, String bio, String profilePicture) {
+    // Constructors, getters, and setters
+
+    public User() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public User(String username, String password, String email, String bio, String profilePicture, Set<Role> roles) {
         this.username = username;
         this.password = password;
-        this.role=role;
         this.email = email;
         this.bio = bio;
         this.profilePicture = profilePicture;
-        this.createdAt = LocalDateTime.now(); // Set the createdAt time to now
-    }
-
-
-    // Default constructor for JPA
-    public User() {
-        this.createdAt = LocalDateTime.now(); // Ensure createdAt is set for new instances
+        this.createdAt = LocalDateTime.now();
+        this.roles = roles;
     }
 
     // Getters and setters
@@ -69,13 +74,6 @@ public class User {
         this.username = username;
     }
 
-    public void setRole(String role) {
-        this.role=role;
-    }
-
-    public String getRole() {
-        return role;
-    }
 
     public String getPassword() {
         return password;
@@ -111,6 +109,15 @@ public class User {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
