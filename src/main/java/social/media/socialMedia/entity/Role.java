@@ -19,8 +19,6 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>();
 
-    // Constructors, getters, and setters
-
     public Role() {}
 
     public Role(String name) {

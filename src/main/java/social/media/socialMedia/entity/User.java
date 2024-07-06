@@ -41,8 +41,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Constructors, getters, and setters
-
     public User() {
         this.createdAt = LocalDateTime.now();
     }
