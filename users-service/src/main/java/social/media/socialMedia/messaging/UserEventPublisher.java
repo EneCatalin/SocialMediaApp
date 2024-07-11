@@ -2,6 +2,7 @@ package social.media.socialMedia.messaging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,13 @@ public class UserEventPublisher {
     }
 
     public void publishUserDeleted(User user) {
-        UserEvent userDeletedEvent = new UserDeletedEvent(user.getId(), user.getEmail());
-        logger.info("Publishing User Deleted Event: {}", userDeletedEvent);
-        amqpTemplate.convertAndSend(exchange, UserRoutingKey.USER_DELETED.getKey(), userDeletedEvent);
+        try {
+            UserEvent userDeletedEvent = new UserDeletedEvent(user.getId(), user.getEmail());
+            logger.info("Publishing User Deleted Event: {}", userDeletedEvent);
+            amqpTemplate.convertAndSend(exchange, UserRoutingKey.USER_DELETED.getKey(), userDeletedEvent);
+        } catch (AmqpException e) {
+            logger.error("Failed to publish user deleted event for user: {}", user, e);
+            // Handle retry or log to a database for future handling
+        }
     }
 }

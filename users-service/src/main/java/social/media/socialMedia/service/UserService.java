@@ -1,27 +1,29 @@
 package social.media.socialMedia.service;
 
 import jakarta.persistence.EntityExistsException;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import social.media.socialMedia.dto.CreateUserDto;
+import social.media.socialMedia.dto.CreateUserResponseDto;
 import social.media.socialMedia.dto.FindByUsernameDto;
+import social.media.socialMedia.dto.UpdateUserDto;
 import social.media.socialMedia.entity.Role;
 import social.media.socialMedia.entity.User;
 import social.media.socialMedia.exception.ResourceNotFoundException;
+import social.media.socialMedia.exception.event.UserEventPublisherException;
 import social.media.socialMedia.exception.user.UserCreationException;
+import social.media.socialMedia.exception.user.UserNotFoundException;
 import social.media.socialMedia.messaging.UserEventPublisher;
 import social.media.socialMedia.repository.RoleRepository;
 import social.media.socialMedia.repository.UserRepository;
 import social.media.socialMedia.util.mapper.UserMapper;
 import social.media.socialMedia.util.seed.Constants;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,9 +46,53 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
-    private User findByUsername(String username) {
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
-        return userOptional.orElse(null);
+    private Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    private Optional<User> findByUserId(UUID userId) {
+        return userRepository.findById(userId);
+    }
+
+    private void saveUserOrThrow(User user) {
+        try {
+            userRepository.save(user);
+            logger.info("User created successfully: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to save user: {}", user, e);
+            throw new UserCreationException("Failed to save user: " + user, e);
+        }
+    }
+
+
+    private void publishUserCreatedEvent(User user) {
+        try {
+            userEventPublisher.publishUserCreated(user);
+            logger.info("User CREATED event published: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to publish user CREATED event: {}", user, e);
+            throw new UserEventPublisherException("Failed to publish user created event: " + user, e);
+        }
+    }
+
+    private void publishUserUpdatedEvent(User user) {
+        try {
+            userEventPublisher.publishUserUpdated(user);
+            logger.info("User UPDATED event published: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to publish user UPDATED event: {}", user, e);
+            throw new UserEventPublisherException("Failed to publish user created event: " + user, e);
+        }
+    }
+
+    private void publishDeletedUserEvent(User user) {
+        try {
+            userEventPublisher.publishUserDeleted(user);
+            logger.info("User DELETED event published: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to publish user DELETED event: {}", user, e);
+            throw new UserEventPublisherException("Failed to publish user created event: " + user, e);
+        }
     }
 
     public List<FindByUsernameDto> getAllUsers() {
@@ -58,13 +104,7 @@ public class UserService {
 
     public FindByUsernameDto getUserByUsername(String username) {
         logger.info("Fetching user with username: {}", username);
-        User user = findByUsername(username);
-
-        //! Not sure if this is exception worthy
-        if (user == null) {
-            logger.error("User not found with username: {}", username);
-            throw new ResourceNotFoundException("User not found with username: " + username);
-        }
+        User user = findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found: " + username));
 
         return userMapper.userToUserDto(user);
     }
@@ -78,7 +118,8 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             // Set roles based on predefined roles
             //TODO: TOFIX:
-            Optional<Role> role = roleRepository.findByName(user.getUsername().equals("DemoAdmin") ? "ROLE_ADMIN" : "ROLE_USER");
+            Optional<Role> role = roleRepository.findByName(user.getUsername().equals("DemoAdmin") ?
+                    Constants.adminRole.toString() : Constants.userRole.toString());
 
             assert role.orElse(null) != null;
             user.setRoles(new HashSet<>(Set.of(role.orElse(null))));
@@ -93,56 +134,75 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public FindByUsernameDto createUser(CreateUserDto createUserDto) {
-        // Check if user already exists
-        if (userRepository.existsByUsername(createUserDto.username())) {
-            logger.error("Attempted to create a user that already exists: {}", createUserDto.username());
-            throw new EntityExistsException("User already exists with username: " + createUserDto.username());
+    private void checkUserExistsOrThrow(String username) throws EntityExistsException {
+        if (userRepository.existsByUsername(username)) {
+            logger.error("Attempted to create a user that already exists: {}", username);
+            throw new EntityExistsException("User already exists with username: " + username);
         }
+    }
 
-        // Get role or throw if not found
+    private User prepareUser(CreateUserDto createUserDto) {
         Role role = roleRepository.findByName(createUserDto.role())
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + createUserDto.role()));
 
-        // Map DTO to entity and set properties
         User user = userMapper.createUserDtoToUser(createUserDto);
         user.setRoles(new HashSet<>(Set.of(role)));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return user;
+    }
 
-        // Save user
-
-        User savedUser;
-        try {
-            savedUser= userRepository.save(user);
-            logger.info("User created successfully: {}", savedUser);
-        } catch (Exception e) {
-            logger.error("Failed to save user: {}", user, e);
-            throw new UserCreationException("Failed to save user: " + user, e);
-        }
-        logger.info("User created successfully: {}", savedUser);
+    @Transactional
+    public CreateUserResponseDto createUser(CreateUserDto createUserDto) {
+        checkUserExistsOrThrow(createUserDto.username());
+        //prepare user for db
+        User user = prepareUser(createUserDto);
+        //save user
+        saveUserOrThrow(user);
 
         // Publish event
-        try {
-            userEventPublisher.publishUserCreated(savedUser);
-        } catch (Exception e) {
-            logger.error("Failed to publish user created event for user: {}", savedUser, e);
-            // Consider how critical it is to handle event publishing failure
-        }
-
+        publishUserCreatedEvent(user);
         // Map to DTO and return
-        return userMapper.userToUserDto(savedUser);
+        return userMapper.createUserToCreateUserResponseDto(user);
     }
 
 
+    @Transactional
     public void deleteUserByUsername(String username) {
+        User user = findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+
         logger.info("Deleting user with username: {}", username);
-        User user = findByUsername(username);
-        if (user != null) {
-            userRepository.delete(user);
-        } else {
-            logger.error("User not found with username: {}", username);
-            throw new ResourceNotFoundException("User not found with username: " + username);
-        }
+        userRepository.delete(user);
+
+        // Publish event
+        publishDeletedUserEvent(user);
+    }
+
+    private void setUserRoles(User user, UpdateUserDto updateUserDto) {
+        Set<Role> roles = updateUserDto.roles().stream()
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+    }
+
+    //TODO: test if it saves updated user roles
+    @Transactional
+    public FindByUsernameDto updateUser(UpdateUserDto updateUserDto) {
+        User existingUser = findByUserId(updateUserDto.id())
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + updateUserDto.username()));
+
+        logger.info("Updating user with username: {}", updateUserDto.username());
+
+        setUserRoles(existingUser, updateUserDto);
+
+        // Update other fields
+        userMapper.updateUserDtoToUser(updateUserDto, existingUser);
+        saveUserOrThrow(existingUser);
+
+        publishUserUpdatedEvent(existingUser);
+
+        return userMapper.userToUserDto(existingUser);
     }
 
 }

@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social.media.socialMedia.dto.CreateUserDto;
+import social.media.socialMedia.dto.CreateUserResponseDto;
 import social.media.socialMedia.dto.FindByUsernameDto;
+import social.media.socialMedia.dto.UpdateUserDto;
 import social.media.socialMedia.service.UserService;
 
 import java.util.HashMap;
@@ -80,9 +82,16 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<FindByUsernameDto> createUser(@RequestBody CreateUserDto user) {
-        FindByUsernameDto createdUser = userService.createUser(user);
+    public ResponseEntity<CreateUserResponseDto> createUser(@RequestBody CreateUserDto user) {
+        CreateUserResponseDto createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
+    }
+
+
+    @PutMapping
+    public ResponseEntity<FindByUsernameDto> updateUser(@RequestBody UpdateUserDto user) {
+        FindByUsernameDto updatedUser = userService.updateUser(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping()
