@@ -1,5 +1,6 @@
 package social.media.socialMedia.service;
 
+import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import social.media.socialMedia.dto.FindByUsernameDto;
 import social.media.socialMedia.entity.Role;
 import social.media.socialMedia.entity.User;
 import social.media.socialMedia.exception.ResourceNotFoundException;
+import social.media.socialMedia.exception.user.UserCreationException;
+import social.media.socialMedia.messaging.UserEventPublisher;
 import social.media.socialMedia.repository.RoleRepository;
 import social.media.socialMedia.repository.UserRepository;
 import social.media.socialMedia.util.mapper.UserMapper;
@@ -27,6 +30,9 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
+    UserEventPublisher userEventPublisher;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -38,9 +44,6 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
-    private String encodePassword(String password) {
-        return passwordEncoder.encode(password);
-    }
     private User findByUsername(String username) {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         return userOptional.orElse(null);
@@ -74,8 +77,11 @@ public class UserService {
         Constants.seedUsersList.forEach(user -> {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             // Set roles based on predefined roles
-            Role role = roleRepository.findByName(user.getUsername().equals("DemoAdmin") ? "ROLE_ADMIN" : "ROLE_USER");
-            user.setRoles(new HashSet<>(Set.of(role)));
+            //TODO: TOFIX:
+            Optional<Role> role = roleRepository.findByName(user.getUsername().equals("DemoAdmin") ? "ROLE_ADMIN" : "ROLE_USER");
+
+            assert role.orElse(null) != null;
+            user.setRoles(new HashSet<>(Set.of(role.orElse(null))));
         });
 
         // Save users
@@ -88,21 +94,45 @@ public class UserService {
     }
 
     public FindByUsernameDto createUser(CreateUserDto createUserDto) {
+        // Check if user already exists
+        if (userRepository.existsByUsername(createUserDto.username())) {
+            logger.error("Attempted to create a user that already exists: {}", createUserDto.username());
+            throw new EntityExistsException("User already exists with username: " + createUserDto.username());
+        }
+
+        // Get role or throw if not found
+        Role role = roleRepository.findByName(createUserDto.role())
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + createUserDto.role()));
+
+        // Map DTO to entity and set properties
         User user = userMapper.createUserDtoToUser(createUserDto);
-
-        // Find role from the database
-        Role role = roleRepository.findByName("ROLE_USER"); // Assuming all new users get "ROLE_USER" role
         user.setRoles(new HashSet<>(Set.of(role)));
-
-        // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Save user
-        User savedUser = userRepository.save(user);
 
-        // Map to DTO
+        User savedUser;
+        try {
+            savedUser= userRepository.save(user);
+            logger.info("User created successfully: {}", savedUser);
+        } catch (Exception e) {
+            logger.error("Failed to save user: {}", user, e);
+            throw new UserCreationException("Failed to save user: " + user, e);
+        }
+        logger.info("User created successfully: {}", savedUser);
+
+        // Publish event
+        try {
+            userEventPublisher.publishUserCreated(savedUser);
+        } catch (Exception e) {
+            logger.error("Failed to publish user created event for user: {}", savedUser, e);
+            // Consider how critical it is to handle event publishing failure
+        }
+
+        // Map to DTO and return
         return userMapper.userToUserDto(savedUser);
     }
+
 
     public void deleteUserByUsername(String username) {
         logger.info("Deleting user with username: {}", username);

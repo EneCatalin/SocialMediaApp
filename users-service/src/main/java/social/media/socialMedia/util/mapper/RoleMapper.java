@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import social.media.socialMedia.entity.Role;
 import social.media.socialMedia.repository.RoleRepository;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,8 @@ public interface RoleMapper {
                 .collect(Collectors.toSet());
     }
 
-    default Set<Role> mapRoleNamesToRoles(Set<String> roleNames, RoleRepository roleRepository) {
+    //TODO: TOFIX: this
+    default Set<Optional<Role>> mapRoleNamesToRoles(Set<String> roleNames, RoleRepository roleRepository) {
         if (roleNames == null) {
             return null;
         }
