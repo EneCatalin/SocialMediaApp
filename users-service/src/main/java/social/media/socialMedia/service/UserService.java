@@ -57,7 +57,7 @@ public class UserService {
         logger.info("Fetching user with username: {}", username);
         User user = findByUsername(username);
 
-        //! Not sure this is exception worthy
+        //! Not sure if this is exception worthy
         if (user == null) {
             logger.error("User not found with username: {}", username);
             throw new ResourceNotFoundException("User not found with username: " + username);
@@ -86,21 +86,6 @@ public class UserService {
                 .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
     }
-//    public List<FindByUsernameDto> seedUsers() {
-//        // Save roles first
-//        roleRepository.saveAll(List.of(Constants.userRole, Constants.adminRole));
-//
-//        // Encode passwords
-//        Constants.seedUsersList.forEach(user -> user.setPassword(passwordEncoder.encode(user.getPassword())));
-//
-//        // Save users
-//        List<User> users = userRepository.saveAll(Constants.seedUsersList);
-//
-//        // Map users to DTOs
-//        return users.stream()
-//                .map(userMapper::userToUserDto)
-//                .collect(Collectors.toList());
-//    }
 
     public FindByUsernameDto createUser(CreateUserDto createUserDto) {
         User user = userMapper.createUserDtoToUser(createUserDto);
@@ -118,24 +103,6 @@ public class UserService {
         // Map to DTO
         return userMapper.userToUserDto(savedUser);
     }
-
-
-
-
-//    public List<FindByUsernameDto> seedUsers() {
-//        Constants.seedUsersList.forEach(user -> user.setPassword(encodePassword(user.getPassword())));
-//        return userRepository.saveAll(Constants.seedUsersList).stream()
-//                .map(userMapper::userToUserDto)
-//                .collect(Collectors.toList());
-//    }
-
-//    public FindByUsernameDto createUser(CreateUserDto  createUserDto) {
-//        User user = userMapper.createUserDtoToUser(createUserDto);
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//
-//        return userMapper.userToUserDto(userRepository.save(user));
-//    }
-
 
     public void deleteUserByUsername(String username) {
         logger.info("Deleting user with username: {}", username);

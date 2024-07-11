@@ -34,6 +34,12 @@ dependencies {
 	// Swagger / OpenAPI 3 dependencies
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
+    //	rabbitmq
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	//could be pointless but I can afford the space/build time
+	implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
+
+
 	// mapStruct
 	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
