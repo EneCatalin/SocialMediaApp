@@ -64,6 +64,15 @@ public class UserService {
         }
     }
 
+    private void deleteUserOrThrow(User user) {
+        try {
+            userRepository.delete(user);
+            logger.info("User deleted successfully: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to delete user: {}", user, e);
+            throw new UserCreationException("Failed to delete user: " + user, e);
+        }
+    }
 
     private void publishUserCreatedEvent(User user) {
         try {
@@ -113,23 +122,30 @@ public class UserService {
         // Save roles first
         roleRepository.saveAll(List.of(Constants.userRole, Constants.adminRole));
 
-        // Encode passwords and set roles
-        Constants.seedUsersList.forEach(user -> {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            // Set roles based on predefined roles
-            //TODO: TOFIX:
-            Optional<Role> role = roleRepository.findByName(user.getUsername().equals("DemoAdmin") ?
-                    Constants.adminRole.toString() : Constants.userRole.toString());
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: ROLE_USER"));
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: ROLE_ADMIN"));
 
-            assert role.orElse(null) != null;
-            user.setRoles(new HashSet<>(Set.of(role.orElse(null))));
+        List<User> preparedUsers = Constants.seedUsersList.stream().map(user -> {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            Set<Role> roles = new HashSet<>();
+            if (user.getUsername().equals("DemoAdmin")) {
+                roles.add(adminRole);
+            } else {
+                roles.add(userRole);
+            }
+            user.setRoles(roles);
+            return user;
+        }).collect(Collectors.toList());
+
+        List<User> savedUsers = userRepository.saveAll(preparedUsers);
+        savedUsers.forEach(user -> {
+            publishUserCreatedEvent(user); // Now the user has an ID
         });
 
-        // Save users
-        List<User> users = userRepository.saveAll(Constants.seedUsersList);
-
         // Map users to DTOs
-        return users.stream()
+        return savedUsers.stream()
                 .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
     }
@@ -167,11 +183,11 @@ public class UserService {
 
 
     @Transactional
-    public void deleteUserByUsername(String username) {
-        User user = findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+    public void deleteUserById(UUID userId) {
 
-        logger.info("Deleting user with username: {}", username);
-        userRepository.delete(user);
+        User user = findByUserId(userId).orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+
+        deleteUserOrThrow(user);
 
         // Publish event
         publishDeletedUserEvent(user);

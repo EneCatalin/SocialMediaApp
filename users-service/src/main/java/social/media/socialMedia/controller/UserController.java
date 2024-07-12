@@ -17,6 +17,7 @@ import social.media.socialMedia.service.UserService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -94,12 +95,12 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping()
-    public ResponseEntity<Map<String, String>> deleteByUsername() {
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Map<String, String>> deleteByUserId(@PathVariable UUID userId) {
         Map<String, String> response = new HashMap<>();
         response.put("status", "UP");
 
-        userService.deleteUserByUsername("admin");
+        userService.deleteUserById(userId);
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
 }

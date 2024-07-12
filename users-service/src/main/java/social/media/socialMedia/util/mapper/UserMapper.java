@@ -16,6 +16,7 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(source = "roles", target = "roles")
+    @Mapping(source = "id" , target = "userId")
     FindByUsernameDto userToUserDto(User user);
 
     @Mapping(source = "roles", target = "roles")

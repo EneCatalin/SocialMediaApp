@@ -46,4 +46,18 @@ public class UserEventPublisher {
             // Handle retry or log to a database for future handling
         }
     }
+
+//    public void publishSeedUsers(User[] users) {
+//        for (User user : users) {
+//            try {
+//                UserEvent userCreatedEvent = new UserCreatedEvent(user.getId(), user.getUsername(), user.getEmail());
+//                logger.info("Publishing Seeded User Created Event: {}", userCreatedEvent);
+//                amqpTemplate.convertAndSend(exchange, UserRoutingKey.USER_CREATED.getKey(), userCreatedEvent);
+//            } catch (AmqpException e) {
+//                logger.error("Failed to publish seeded user created event for user: {}", user, e);
+//                // Consider adding some form of error handling here, such as retrying or logging to a service that can alert you.
+//            }
+//        }
+//    }
+
 }
