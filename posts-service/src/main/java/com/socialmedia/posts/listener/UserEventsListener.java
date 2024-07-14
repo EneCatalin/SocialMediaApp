@@ -22,13 +22,25 @@ public class UserEventsListener {
 
         switch (event.eventType()) {
             case MessagingConstants.USER_CREATED:
-                userEventService.handleUserCreated(event);
+                try{
+                    userEventService.handleUserCreated(event);
+                } catch (Exception e) {
+                    logger.error("Failed to handle user created event: {}", event, e);
+                }
                 break;
             case MessagingConstants.USER_UPDATED:
-                userEventService.handleUserUpdated(event);
+                try {
+                    userEventService.handleUserUpdated(event);
+                } catch (Exception e) {
+                    logger.error("Failed to handle user updated event: {}", event, e);
+                }
                 break;
             case MessagingConstants.USER_DELETED:
-                userEventService.handleUserDeleted(event);
+                try {
+                    userEventService.handleUserDeleted(event);
+                } catch (Exception e) {
+                    logger.error("Failed to handle user deleted event: {}", event, e);
+                }
                 break;
             default:
                 logger.error("Unknown event type: {}", event.eventType());
