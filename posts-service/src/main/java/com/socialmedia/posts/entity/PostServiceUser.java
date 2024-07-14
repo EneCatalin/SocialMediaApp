@@ -11,18 +11,17 @@ import java.util.UUID;
 public class PostServiceUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false, updatable = false)
+    @Column(name = "id", unique = true,nullable = false, updatable = false)
     private UUID id;
 
-    @Column(length = 255)
+    @Column(length = 255, unique = true, nullable = false)
     private String username;
 
-    @Column(length = 255)
+    @Column(length = 255, unique = true, nullable = false)
     private String email;
 
-    @Column(length = 512)
-    private String profilePicture;
+//    @Column(length = 512)
+//    private String profilePicture;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;  // One user can have many posts
@@ -32,11 +31,10 @@ public class PostServiceUser {
     }
 
     // Constructor with parameters
-    public PostServiceUser(UUID id, String username, String email, String profilePicture) {
+    public PostServiceUser(UUID id, String username, String email) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.profilePicture = profilePicture;
     }
 
     // Getters and Setters
@@ -64,14 +62,6 @@ public class PostServiceUser {
         this.email = email;
     }
 
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
     public List<Post> getPosts() {
         return posts;
     }
@@ -86,7 +76,6 @@ public class PostServiceUser {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", profilePicture='" + profilePicture + '\'' +
                 '}';
     }
 }
