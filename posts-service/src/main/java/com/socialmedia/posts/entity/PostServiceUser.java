@@ -1,6 +1,7 @@
 package com.socialmedia.posts.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class PostServiceUser {
 
 //    @Column(length = 512)
 //    private String profilePicture;
-
+    @JsonManagedReference // This will manage the forward part of reference during serialization
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;  // One user can have many posts
 

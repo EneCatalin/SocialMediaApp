@@ -1,5 +1,8 @@
 package com.socialmedia.posts.controller;
 
+import com.socialmedia.posts.dto.post.PostsByUserIdDto;
+import com.socialmedia.posts.dto.post.CreatePostDto;
+import com.socialmedia.posts.dto.post.CreatePostResponseDto;
 import com.socialmedia.posts.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 //TODO
 //FIXME: add swagger
@@ -27,12 +31,12 @@ public class PostController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-//
-//    @GetMapping("/${userId}")
-//    public ResponseEntity<PostsByUserIdDto> getUserPosts(@PathVariable UUID userId) {
-//        PostsByUserIdDto responseDto = posts.getPostsByUserId(userId);
-//        return ResponseEntity.ok(responseDto);
-//    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<PostsByUserIdDto> getUserPosts(@PathVariable UUID userId) {
+        PostsByUserIdDto responseDto = posts.getPostsByUserId(userId);
+        return ResponseEntity.ok(responseDto);
+    }
 
 //
 //    @GetMapping("/${userId}/${postId}")
@@ -42,11 +46,11 @@ public class PostController {
 //    }
 //
 //
-//    @PostMapping("/${userId}")
-//    public ResponseEntity<CreatePostResponseDto> createPost(@PathVariable UUID userId, @RequestBody CreatePostDto createPostDto) {
-//        CreatePostResponseDto responseDto = posts.createPost(userId, createPostDto);
-//        return ResponseEntity.ok(responseDto);
-//    }
+    @PostMapping("/{userId}")
+    public ResponseEntity<CreatePostResponseDto> createPost(@PathVariable UUID userId, @RequestBody CreatePostDto createPostDto) {
+        CreatePostResponseDto responseDto = posts.createPost(userId, createPostDto);
+        return ResponseEntity.ok(responseDto);
+    }
 //
 //    @DeleteMapping("/${userId}/${postId}")
 //    public ResponseEntity<Map<String, String>> deletePost(@PathVariable UUID userId, @PathVariable UUID postId) {
