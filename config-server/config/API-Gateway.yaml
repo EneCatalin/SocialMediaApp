@@ -1,25 +1,24 @@
+server:
+  port: 8090
+
 spring:
   application:
     name: API-Gateway
   cloud:
-    config:
-      gateway:
-        routes:
-          - id: users-service
-            uri: http://localhost:8082
-            predicates:
-              - Path=/users/**  # Simplified to match all under /users
-            filters:
-              - RewritePath=/users/(?<path>.*), /$\{path}
-          - id: posts-service
-            uri: http://localhost:8081
-            predicates:
-              - Path=/posts/**  # Simplified to match all under /posts
-            filters:
-              - RewritePath=/posts/(?<path>.*), /$\{path}
-
-server:
-  port: 8090
+    gateway:
+      routes:
+        - id: users-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/users/**  # Simplified to match all under /users
+          filters:
+            - RewritePath=/users/(?<path>.*), /$\{path}
+        - id: posts-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/posts/**  # Simplified to match all under /posts
+          filters:
+            - RewritePath=/posts/(?<path>.*), /$\{path}
 
 management:
   endpoints:
