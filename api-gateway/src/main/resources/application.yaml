@@ -1,24 +1,55 @@
+#spring:
+#  cloud:
+#    config:
+#      uri: http://localhost:8888
+#  application:
+#    name: API-Gateway
+#    profiles:
+#      active: default
+server:
+  port: 8090
+
 spring:
   cloud:
-    config:
-      uri: http://localhost:8888
-  application:
-    name: API-Gateway
-    profiles:
-      active: default
-
+    discovery:
+      enabled: false
     gateway:
       routes:
-      - id: users-service
-        uri:  http://localhost:8082
-        predicates:
-        - Path=/users || Path=/users/**
-        filters:
-          - RewritePath=/users/(?<path>.*), /$\{path}
+        - id: google-test
+          uri: https://httpbin.org
+          predicates:
+            - Path=/google-test/**
+          filters:
+            - AddRequestHeader=Custom-Header, CustomValue
+        - id: users-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/users/**
+          filters:
+            - RewritePath=/users/(?<path>.*), /$\{path}
+        - id: posts-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/posts/**
+          filters:
+            - RewritePath=/posts/(?<path>.*), /$\{path}
 
-      - id: posts-service
-        uri:  http://localhost:8081
-        predicates:
-        - Path=/posts || Path=/posts/**
-        filters:
-          - RewritePath=/posts/(?<path>.*), /$\{path}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+  configprops:
+    keys-to-sanitize: ""
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: DEBUG
+    reactor:
+      netty: DEBUG

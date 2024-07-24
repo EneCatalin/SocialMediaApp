@@ -1,0 +1,32 @@
+#server:
+#  port: 8090
+#
+#spring:
+#  cloud:
+#    discovery:
+#      enabled: false
+#    gateway:
+#      routes:
+#        - id: users-service
+#          uri: http://localhost:8082
+#          predicates:
+#            - Path=/users/**
+#          filters:
+#            - RewritePath=/users/(?<path>.*), /$\{path}
+#        - id: posts-service
+#          uri: http://localhost:8081
+#          predicates:
+#            - Path=/posts/**
+#          filters:
+#            - RewritePath=/posts/(?<path>.*), /$\{path}
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#    endpoint:
+#      gateway:
+#        enabled: true
+#    configprops:
+#      keys-to-sanitize: ""
