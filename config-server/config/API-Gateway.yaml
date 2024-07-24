@@ -1,9 +1,10 @@
 server:
   port: 8090
 
-
 spring:
   cloud:
+    discovery:
+      enabled: false
     gateway:
       routes:
         - id: users-service
