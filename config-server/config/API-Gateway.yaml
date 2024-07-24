@@ -23,7 +23,8 @@ spring:
 management:
   endpoints:
     web:
-      expose: "*"
+      exposure:
+        include: "*"
     endpoint:
       gateway:
         enabled: true
