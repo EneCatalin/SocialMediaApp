@@ -18,9 +18,6 @@ spring:
             filters:
               - RewritePath=/posts/(?<path>.*), /$\{path}
 
-  profiles:
-    active: default
-
 server:
   port: 8090
 
