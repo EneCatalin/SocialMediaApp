@@ -28,7 +28,6 @@ logging:
     reactor:
       netty: DEBUG
 
-spring:
   cloud:
     gateway:
       routes:
