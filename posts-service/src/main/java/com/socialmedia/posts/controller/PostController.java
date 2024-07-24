@@ -15,7 +15,7 @@ import java.util.UUID;
 //FIXME: add swagger
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/")
 @ControllerAdvice
 public class PostController {
 

@@ -21,7 +21,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/")
 @Tag(name = "User Management", description = "APIs for managing users")
 @ControllerAdvice
 public class UserController {

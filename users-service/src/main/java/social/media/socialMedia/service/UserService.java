@@ -206,14 +206,12 @@ public class UserService {
         user.setRoles(roles);
     }
 
-    //TODO: test if it saves updated user roles
     @Transactional
     public FindByUsernameDto updateUser(UpdateUserDto updateUserDto) {
         User existingUser = findByUserId(updateUserDto.id())
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + updateUserDto.username()));
 
         logger.info("Updating user with username: {}", updateUserDto.username());
-
         setUserRoles(existingUser, updateUserDto);
 
         // Update other fields
