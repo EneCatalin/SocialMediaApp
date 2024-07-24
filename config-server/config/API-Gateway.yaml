@@ -2,6 +2,15 @@ server:
   port: 8090
 
 spring:
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+      endpoint:
+        gateway:
+          enabled: true
+
   application:
     name: API-Gateway
   cloud:
