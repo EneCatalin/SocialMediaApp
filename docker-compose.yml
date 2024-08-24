@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  config-server:
+    build:
+      context: ./config-server
+    ports:
+      - 8888:8888
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - 8090:8090
+    depends_on:
+      - config-server
