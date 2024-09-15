@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  config-server:
+    build:
+      context: ./config-server
+    ports:
+      - 8888:8888
+    networks:
+      - rabbitmq_go_net
+
+
+networks:
+  rabbitmq_go_net:
+    external: true

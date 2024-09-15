@@ -1,10 +1,45 @@
 version: '3.8'
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbitmq_go_net
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: socialMedia
+    ports:
+      - 5432:5432
+    networks:
+      - rabbitmq_go_net
+
   config-server:
     build:
       context: ./config-server
     ports:
       - 8888:8888
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  users-service:
+    build:
+      context: ./users-service
+    ports:
+      - 8082:8082
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
 
   api-gateway:
     build:
@@ -13,3 +48,34 @@ services:
       - 8090:8090
     depends_on:
       - config-server
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
+
+
+#    version: '3.8'
+#services:
+#  rabbitmq:
+#    image: rabbitmq:3-management-alpine
+#    container_name: 'rabbitmq'
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+#    networks:
+#      - rabbitmq_go_net
+#
+#  postgres:
+#    image: postgres:14
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: admin
+#      POSTGRES_DB: socialMedia
+#    ports:
+#      - 5432:5432
+#    networks:
+#      - rabbitmq_go_net
+#
+#networks:
+#  rabbitmq_go_net:
+#    driver: bridge

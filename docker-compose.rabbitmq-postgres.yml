@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbitmq_go_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: 'postgres'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: socialMedia
+    ports:
+      - 5433:5432  # Mapping the container's port 5432 to the host's port 5433
+    expose:
+      - 5433
+      - 5432
+    networks:
+      - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
+    external: true
