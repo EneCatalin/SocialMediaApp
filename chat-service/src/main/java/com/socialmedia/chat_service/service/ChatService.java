@@ -8,6 +8,7 @@ import com.socialmedia.chat_service.repository.ChatRepository;
 import com.socialmedia.chat_service.repository.MessageRepository;
 import com.socialmedia.chat_service.repository.ParticipantRepository;
 import com.socialmedia.chat_service.repository.UserRepository;
+import dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -91,4 +93,67 @@ public class ChatService {
 
         return seededUsers;
     }
+
+    public UserDto createUser(UserDto userDto) {
+        logger.info("Creating user");
+
+        User user = new User();
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
+        userRepository.save(user);
+
+        return userRepository.getByUsername(userDto.getUsername());
+    }
+
+    public Chat startChat(UUID user1Id, UUID user2Id) {
+        logger.info("Creating chat");
+        Chat chat = new Chat();
+        chat.setCreatedAt(LocalDateTime.now());
+        chat.setUpdatedAt(LocalDateTime.now());
+        chatRepository.save(chat);
+
+
+        logger.info("Add user 1 " + user1Id);
+
+        // Add user1 and user2 as participants
+        Participant participant1 = new Participant();
+        participant1.setChat(chat);
+        participant1.setUser(userRepository.findById(user1Id).orElseThrow());
+        participant1.setRole("participant");
+        participantRepository.save(participant1);
+
+        logger.info("add user 2" + user2Id);
+        Participant participant2 = new Participant();
+        participant2.setChat(chat);
+        participant2.setUser(userRepository.findById(user2Id).orElseThrow());
+        participant2.setRole("participant");
+        participantRepository.save(participant2);
+
+        return chat;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    private void deleteUserOrThrow(User user) {
+        try {
+            userRepository.delete(user);
+            logger.info("User deleted successfully: {}", user);
+        } catch (Exception e) {
+            logger.error("Failed to delete user: {}", user, e);
+            throw new RuntimeException("Failed to delete user: " + user, e);
+        }
+    }
+    private Optional<User> findByUserId(UUID userId) {
+        return userRepository.findById(userId);
+    }
+
+    public void deleteUserById(UUID userId) {
+
+        User user = findByUserId(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        deleteUserOrThrow(user);
+    }
+
 }
