@@ -16,6 +16,7 @@ import social.media.socialMedia.entity.User;
 import social.media.socialMedia.exception.ResourceNotFoundException;
 import social.media.socialMedia.exception.event.UserEventPublisherException;
 import social.media.socialMedia.exception.user.UserCreationException;
+import social.media.socialMedia.exception.user.UserDeletionException;
 import social.media.socialMedia.exception.user.UserNotFoundException;
 import social.media.socialMedia.messaging.UserEventPublisher;
 import social.media.socialMedia.repository.RoleRepository;
@@ -74,7 +75,7 @@ public class UserService {
             logger.info("User deleted successfully: {}", user);
         } catch (Exception e) {
             logger.error("Failed to delete user: {}", user, e);
-            throw new UserCreationException("Failed to delete user: " + user, e);
+            throw new UserDeletionException("Failed to delete user: " + user, e);
         }
     }
 
