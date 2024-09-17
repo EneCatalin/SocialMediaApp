@@ -19,6 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/")
+@ControllerAdvice
 public class ChatController {
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
@@ -28,6 +29,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
+    //TODO: return DTO
     @PostMapping("/seed")
     public ResponseEntity<List<User>> seedUsersAndChat() {
         List<User> seededUsers = chatService.seedChatService();
@@ -47,6 +49,7 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
+    //TODO return DTO
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = chatService.getAllUsers();
@@ -69,6 +72,7 @@ public class ChatController {
         return ResponseEntity.ok(chatIds);
     }
 
+    //TODO return DTO
     @GetMapping("/chats/{chatId}/messages")
     public ResponseEntity<List<Message>> getChatHistory(@PathVariable UUID chatId) {
         List<Message> messages = chatService.getChatMessages(chatId);

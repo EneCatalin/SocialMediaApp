@@ -4,11 +4,13 @@ import com.socialmedia.chat_service.entity.Chat;
 import com.socialmedia.chat_service.entity.Message;
 import com.socialmedia.chat_service.entity.Participant;
 import com.socialmedia.chat_service.entity.User;
+import com.socialmedia.chat_service.exception.user.UserAlreadyExists;
 import com.socialmedia.chat_service.repository.ChatRepository;
 import com.socialmedia.chat_service.repository.MessageRepository;
 import com.socialmedia.chat_service.repository.ParticipantRepository;
 import com.socialmedia.chat_service.repository.UserRepository;
 import dto.UserDto;
+import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,19 @@ public class ChatService {
         this.participantRepository = participantRepository;
     }
 
+    private void checkUserExistsByIdOrThrow(UUID userId) throws EntityExistsException {
+        if (userRepository.existsById(userId)) {
+            logger.error("Attempted to create a user that already exists: {}", userId);
+            throw new UserAlreadyExists("User already exists with username: " + userId);
+        }
+    }
+
 
     // Method to get all chats a user is involved in
     public List<UUID> getUserChats(UUID userId) {
+        // Check if user exists
+        checkUserExistsByIdOrThrow(userId);
+        //should I check if user is a participant in any chat first?
         return participantRepository.findByUserId(userId).stream()
                 .map(participant -> participant.getChat().getId())
                 .collect(Collectors.toList());
@@ -49,6 +61,7 @@ public class ChatService {
         return messageRepository.findByChatIdOrderBySentAtAsc(chatId);
     }
 
+    //TODO refactor next
     public List<User> seedChatService() {
         logger.info("Seeding chat-service");
 
@@ -145,6 +158,7 @@ public class ChatService {
             throw new RuntimeException("Failed to delete user: " + user, e);
         }
     }
+
     private Optional<User> findByUserId(UUID userId) {
         return userRepository.findById(userId);
     }
