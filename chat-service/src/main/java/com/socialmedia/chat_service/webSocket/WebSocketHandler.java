@@ -33,15 +33,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         IncomingMessage incomingMessage = objectMapper.readValue(textMessage.getPayload(), IncomingMessage.class);
 
-        Optional<Chat> chat = chatRepository.findById(incomingMessage.chatId);
-        Optional<User> sender = userRepository.findById(incomingMessage.senderId);
+        Optional<Chat> chat = chatRepository.findById(incomingMessage.chatId());
+        Optional<User> sender = userRepository.findById(incomingMessage.senderId());
 
         if (chat.isPresent() && sender.isPresent()) {
             // Create and save message as usual
             Message message = new Message();
             message.setChat(chat.get());
             message.setSender(sender.get());
-            message.setContent(incomingMessage.content);
+            message.setContent(incomingMessage.content());
             message.setSentAt(LocalDateTime.now());
 
             messageRepository.save(message);

@@ -45,7 +45,7 @@ public class ChatController {
 
     @PostMapping("/chats")
     public ResponseEntity<Chat> startChat(@RequestBody ChatRequest chatRequest) {
-        Chat chat = chatService.startChat(chatRequest.getUser1Id(), chatRequest.getUser2Id());
+        Chat chat = chatService.startChat(chatRequest.user1Id(), chatRequest.user2Id());
         return ResponseEntity.ok(chat);
     }
 
