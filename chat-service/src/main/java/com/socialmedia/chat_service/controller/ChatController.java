@@ -1,6 +1,6 @@
 package com.socialmedia.chat_service.controller;
 
-import com.socialmedia.chat_service.dto.ChatRequest;
+import com.socialmedia.chat_service.dto.ChatRequestDto;
 import com.socialmedia.chat_service.dto.MessageDto;
 import com.socialmedia.chat_service.dto.UserDto;
 import com.socialmedia.chat_service.entity.Chat;
@@ -44,10 +44,11 @@ public class ChatController {
     }
 
     @PostMapping("/chats")
-    public ResponseEntity<Chat> startChat(@RequestBody ChatRequest chatRequest) {
-        Chat chat = chatService.startChat(chatRequest.user1Id(), chatRequest.user2Id());
+    public ResponseEntity<Chat> startChat(@RequestBody ChatRequestDto chatRequestDto) {
+        Chat chat = chatService.startGroupChat(chatRequestDto.userIds());
         return ResponseEntity.ok(chat);
     }
+
 
     //TODO return DTO
     @GetMapping("/users")

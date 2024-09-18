@@ -153,4 +153,23 @@ public class ChatService {
         deleteUserOrThrow(user);
     }
 
+    public Chat startGroupChat(List<UUID> userIds) {
+        logger.info("Creating group chat");
+        Chat chat = new Chat();
+        chat.setCreatedAt(LocalDateTime.now());
+        chat.setUpdatedAt(LocalDateTime.now());
+        chatRepository.save(chat);
+
+        // Add all users as participants in the chat
+        for (UUID userId : userIds) {
+            Participant participant = new Participant();
+            participant.setChat(chat);
+            participant.setUser(userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found: " + userId)));
+            participant.setRole("participant"); // You can update roles later for specific use cases
+            participantRepository.save(participant);
+        }
+
+        return chat;
+    }
 }
