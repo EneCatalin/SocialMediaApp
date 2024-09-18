@@ -1,5 +1,7 @@
 package com.socialmedia.chat_service.service;
 
+import com.socialmedia.chat_service.dto.MessageDto;
+import com.socialmedia.chat_service.dto.UserDto;
 import com.socialmedia.chat_service.entity.Chat;
 import com.socialmedia.chat_service.entity.Message;
 import com.socialmedia.chat_service.entity.Participant;
@@ -12,7 +14,8 @@ import com.socialmedia.chat_service.repository.MessageRepository;
 import com.socialmedia.chat_service.repository.ParticipantRepository;
 import com.socialmedia.chat_service.repository.UserRepository;
 import com.socialmedia.chat_service.seed.SeedChat;
-import dto.UserDto;
+import com.socialmedia.chat_service.util.mapper.MessageMapper;
+import com.socialmedia.chat_service.util.mapper.UserMapper;
 import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +35,17 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final ParticipantRepository participantRepository;
+    private final UserMapper userMapper;
+    private final MessageMapper messageMapper;
 
-    public ChatService(UserRepository userRepository, ChatRepository chatRepository,MessageRepository messageRepository, ParticipantRepository participantRepository) {
+
+    public ChatService(UserRepository userRepository, ChatRepository chatRepository, MessageRepository messageRepository, ParticipantRepository participantRepository, UserMapper userMapper, MessageMapper messageMapper) {
         this.userRepository = userRepository;
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
         this.participantRepository = participantRepository;
+        this.userMapper = userMapper;
+        this.messageMapper = messageMapper;
     }
 
     private void checkUserExistsByIdOrThrow(UUID userId) throws EntityExistsException {
@@ -59,8 +67,13 @@ public class ChatService {
     }
 
     // Method to fetch messages for a chat
-    public List<Message> getChatMessages(UUID chatId) {
-        return messageRepository.findByChatIdOrderBySentAtAsc(chatId);
+    public List<MessageDto> getChatMessages(UUID chatId) {
+        List<Message> messages = messageRepository.findByChatIdOrderBySentAtAsc(chatId);
+
+        // Convert each Message entity to MessageDto using the mapper
+        return messages.stream()
+                .map(messageMapper::messageToMessageDto)
+                .collect(Collectors.toList());
     }
 
     //not sure if this is the way to refactor it, but it should keep it separate
@@ -71,13 +84,16 @@ public class ChatService {
     public UserDto createUser(UserDto userDto) {
         logger.info("Creating user");
 
-        User user = new User();
-        user.setUsername(userDto.getUsername());
-        user.setEmail(userDto.getEmail());
-        userRepository.save(user);
+        // Use the mapper to convert the DTO to an entity
+        User user = userMapper.userDtoToUser(userDto);
 
-        return userRepository.getByUsername(userDto.getUsername());
+        // Save the user entity
+        User savedUser = userRepository.save(user);
+
+        // Map the saved entity back to UserDto (now a record)
+        return userMapper.userToUserDto(savedUser);
     }
+
 
     //don't think this code really repeats in other places, safe to ignore for now
     //the participant role is an interesting one, need to think about roles later
@@ -107,8 +123,13 @@ public class ChatService {
         return chat;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        // Use the mapper to convert the list of users to DTOs
+        return users.stream()
+                .map(userMapper::userToUserDto)
+                .collect(Collectors.toList());
     }
 
     private void deleteUserOrThrow(User user) {

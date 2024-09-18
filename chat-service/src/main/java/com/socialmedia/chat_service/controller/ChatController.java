@@ -1,11 +1,11 @@
 package com.socialmedia.chat_service.controller;
 
+import com.socialmedia.chat_service.dto.ChatRequest;
+import com.socialmedia.chat_service.dto.MessageDto;
+import com.socialmedia.chat_service.dto.UserDto;
 import com.socialmedia.chat_service.entity.Chat;
-import com.socialmedia.chat_service.entity.Message;
 import com.socialmedia.chat_service.entity.User;
 import com.socialmedia.chat_service.service.ChatService;
-import dto.ChatRequest;
-import dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    //TODO: return DTO
+    //TODO: return DTO -> maybe ignore for seed, this should be a dev route anyway
     @PostMapping("/seed")
     public ResponseEntity<List<User>> seedUsersAndChat() {
         List<User> seededUsers = chatService.seedChatService();
@@ -51,8 +51,8 @@ public class ChatController {
 
     //TODO return DTO
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = chatService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = chatService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
@@ -74,8 +74,8 @@ public class ChatController {
 
     //TODO return DTO
     @GetMapping("/chats/{chatId}/messages")
-    public ResponseEntity<List<Message>> getChatHistory(@PathVariable UUID chatId) {
-        List<Message> messages = chatService.getChatMessages(chatId);
+    public ResponseEntity<List<MessageDto>> getChatHistory(@PathVariable UUID chatId) {
+        List<MessageDto> messages = chatService.getChatMessages(chatId);
         return ResponseEntity.ok(messages);
     }
 }
