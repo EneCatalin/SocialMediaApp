@@ -27,6 +27,26 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime sentAt;
 
+    private LocalDateTime deliveredAt;  // New field
+
+    private LocalDateTime readAt;
+
+    public LocalDateTime getDeliveredAt() {
+        return deliveredAt;
+    }
+
+    public void setDeliveredAt(LocalDateTime deliveredAt) {
+        this.deliveredAt = deliveredAt;
+    }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
+    }
+
     public Message() {
     }
 

@@ -36,6 +36,12 @@ public class ChatController {
         return ResponseEntity.ok(seededUsers);
     }
 
+    @PostMapping("/chats/{chatId}/messages/{messageId}/read")
+    public ResponseEntity<Void> markMessageAsRead(@PathVariable UUID chatId, @PathVariable UUID messageId, @RequestParam UUID userId) {
+        chatService.markMessageAsRead(chatId, messageId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/users")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
         logger.info("Creating user");

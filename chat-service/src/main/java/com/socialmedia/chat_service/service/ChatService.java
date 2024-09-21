@@ -6,6 +6,7 @@ import com.socialmedia.chat_service.entity.Chat;
 import com.socialmedia.chat_service.entity.Message;
 import com.socialmedia.chat_service.entity.Participant;
 import com.socialmedia.chat_service.entity.User;
+import com.socialmedia.chat_service.exception.chat.MessageNotFoundException;
 import com.socialmedia.chat_service.exception.user.UserAlreadyExists;
 import com.socialmedia.chat_service.exception.user.UserDeletionException;
 import com.socialmedia.chat_service.exception.user.UserNotFoundException;
@@ -172,4 +173,13 @@ public class ChatService {
 
         return chat;
     }
+
+    public void markMessageAsRead(UUID chatId, UUID messageId, UUID userId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new MessageNotFoundException("Message not found"));
+
+        message.setReadAt(LocalDateTime.now());
+        messageRepository.save(message);
+    }
+
 }
