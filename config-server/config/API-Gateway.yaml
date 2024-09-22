@@ -9,22 +9,16 @@ spring:
       enabled: false
     gateway:
       routes:
-        - id: google-test
-          uri: https://httpbin.org
-          predicates:
-            - Path=/google-test/**
-          filters:
-            - AddRequestHeader=Custom-Header, CustomValue
         - id: actuator-route-users-service
-          uri: http://localhost:8082
+          uri: http://socialmediaapp-users-service-1:8082
           predicates:
             - Path=/actuator/**
         - id: users-service
-          uri: http://localhost:8082
+          uri: http://socialmediaapp-users-service-1:8082
           predicates:
             - Path=/users/**
           filters:
-            - RewritePath=/users/(?<path>.*), /$\{path}
+              - RewritePath=/users/(?<path>.*), /$\{path}
         - id: posts-service
           uri: http://localhost:8081
           predicates:
