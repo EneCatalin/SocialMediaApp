@@ -49,6 +49,7 @@ public class ChatController {
         return ResponseEntity.ok(responseDto);
     }
 
+
     @PostMapping("/chats")
     public ResponseEntity<Chat> startChat(@RequestBody ChatRequestDto chatRequestDto) {
         Chat chat = chatService.startGroupChat(chatRequestDto.userIds());
@@ -79,7 +80,6 @@ public class ChatController {
         return ResponseEntity.ok(chatIds);
     }
 
-    //TODO return DTO
     @GetMapping("/chats/{chatId}/messages")
     public ResponseEntity<List<MessageDto>> getChatHistory(@PathVariable UUID chatId) {
         List<MessageDto> messages = chatService.getChatMessages(chatId);

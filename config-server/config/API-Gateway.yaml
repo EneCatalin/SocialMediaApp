@@ -15,6 +15,10 @@ spring:
             - Path=/google-test/**
           filters:
             - AddRequestHeader=Custom-Header, CustomValue
+        - id: actuator-route-users-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/actuator/**
         - id: users-service
           uri: http://localhost:8082
           predicates:
