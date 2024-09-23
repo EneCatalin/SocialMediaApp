@@ -14,13 +14,13 @@ services:
     networks:
       - rabbitmq_go_net
 
-  api-gateway:
-    build:
-      context: ./api-gateway
-    ports:
-      - 8090:8090
-    networks:
-      - rabbitmq_go_net
+#  api-gateway:
+#    build:
+#      context: ./api-gateway
+#    ports:
+#      - 8090:8090
+#    networks:
+#      - rabbitmq_go_net
 
 networks:
   rabbitmq_go_net:

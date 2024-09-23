@@ -12,6 +12,9 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
+# Install Git in the final image and verify the installation
+RUN apt-get update && apt-get install -y git && git --version && rm -rf /var/lib/apt/lists/*
+
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
