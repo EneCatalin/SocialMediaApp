@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-
 public class UsersServiceApplication {
 
 	public static void main(String[] args) {
@@ -15,6 +14,5 @@ public class UsersServiceApplication {
 		catch(Exception e) {
 			System.out.println("THE ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR" + e);
 		}
-		}
-
+	}
 }
