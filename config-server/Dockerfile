@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y git && git --version && rm -rf /var/lib
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Copy the local config files into the container
+COPY config /app/config/
+
 # Expose the port that the application will run on
 EXPOSE 8888
 
