@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  posts-service:
+    build:
+      context: ./posts-service
+    ports:
+      - 8081:8081
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/socialMedia
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+    networks:
+      - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
+    external: true
