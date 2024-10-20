@@ -3,6 +3,7 @@ package com.socialmedia.posts.config;
 import com.socialmedia.posts.constants.MessagingConstants;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -21,6 +22,7 @@ public class RabbitConfig {
     @Bean
     public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+
         rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
         return rabbitTemplate;
     }
@@ -35,10 +37,15 @@ public class RabbitConfig {
         return ExchangeBuilder.topicExchange(EXCHANGE_NAME).durable(true).build();
     }
 
+    Queue userEventsQueue() {
+        return new Queue("user-events-queue", true);
+    }
+
     @Bean
     RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
         RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
         rabbitAdmin.declareExchange(eventsExchange());
+        rabbitAdmin.declareQueue(userEventsQueue());
         return rabbitAdmin;
     }
 
