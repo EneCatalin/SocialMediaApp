@@ -10,20 +10,7 @@
 //
 //    @Bean
 //    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-//        return builder.routes()
-//                .route("users-service", r -> r.path("/users/**")
-//                        .uri("http://localhost:8082")
-//                        .filter((exchange, chain) -> {
-//                            // Custom filter logic here if needed
-//                            return chain.filter(exchange);
-//                        }))
-//                .route("posts-service", r -> r.path("/posts/**")
-//                        .uri("http://localhost:8081")
-//                        .filter((exchange, chain) -> {
-//                            // Custom filter logic here if needed
-//                            return chain.filter(exchange);
-//                        }))
-//                .build();
+//        return builder.routes().build();
 //    }
 //}
 //

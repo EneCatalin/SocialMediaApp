@@ -17,8 +17,6 @@ spring:
           uri: http://socialmediaapp-users-service-1:8082
           predicates:
             - Path=/users/**
-          filters:
-              - RewritePath=/users/(?<path>.*), /$\{path}
         - id: posts-service
           uri: http://localhost:8081
           predicates:
