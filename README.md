@@ -66,8 +66,3 @@ Build a Social Media Application where users can create profiles, post updates, 
 
 (Local) Application Swagger:
 http://localhost:8080/swagger-ui/index.html?continue#/User%20Management/checkServiceHealth
-
-    - Use Docker to containerize each microservice.
-    - Use Kubernetes (or another orchestration tool) to manage deployment, scaling, and operation of the containerized services.
-
-This design ensures a modular, scalable, and maintainable architecture for your social media application, leveraging the power of microservices and Spring Cloud technologies.
